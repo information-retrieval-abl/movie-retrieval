@@ -11,35 +11,43 @@ export default async function handler(
   const { q, type } = req.query;
 
   try {
-    // Always start with a fuzzy search to get base results
-    const correctedQuery = new SpellChecker([]).correct(q as string);
-    const baseMovies = await searchMovies(correctedQuery);
-
-    // Initialize indices with the CURRENT search results
+    // Initial search with raw query to get base movies
+    const baseMovies = await searchMovies(q as string);
     const positionalIndex = new PositionalIndex();
     const kgramIndex = new KGramIndex();
-    const spellChecker = new SpellChecker(baseMovies);
 
+    // Build indices from search results
     baseMovies.forEach(movie => {
       positionalIndex.addDocument(movie.id, movie.overview);
       kgramIndex.addTerm(movie.title, movie.id);
     });
 
+    console.log("Search Type:", type);
+    console.log("Raw Query:", q);
+
     let filteredMovies: Movie[] = [];
 
     switch (type) {
       case "phrase":
-        const phraseIds = positionalIndex.searchPhrase(correctedQuery);
+        // Remove quotes and search exact phrase
+        const rawPhrase = (q as string).replace(/"/g, '');
+        const phraseIds = positionalIndex.searchPhrase(rawPhrase);
+        console.log("Phrase IDs:", phraseIds);
         filteredMovies = baseMovies.filter(m => phraseIds.includes(m.id));
         break;
 
       case "wildcard":
-        const wildcardIds = kgramIndex.searchWildcard(correctedQuery);
+        // Keep asterisks for wildcard pattern matching
+        const wildcardPattern = q as string;
+        const wildcardIds = kgramIndex.searchWildcard(wildcardPattern);
+        console.log("Wildcard IDs:", wildcardIds);
         filteredMovies = baseMovies.filter(m => wildcardIds.includes(m.id));
         break;
 
-      default:
-        filteredMovies = baseMovies;
+      default: // fuzzy
+        const correctedQuery = new SpellChecker(baseMovies).correct(q as string);
+        console.log("Corrected Query:", correctedQuery);
+        filteredMovies = await searchMovies(correctedQuery);
     }
 
     // Enrich with actor data

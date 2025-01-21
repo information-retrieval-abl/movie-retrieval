@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface MovieResult {
   id: number;
@@ -14,24 +14,57 @@ export default function Search() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<MovieResult[]>([]);
   const [searchType, setSearchType] = useState<"fuzzy" | "phrase" | "wildcard">("fuzzy");
+  const [isLoading, setIsLoading] = useState(false);
+  const searchTypeRef = useRef(searchType);
+
+  // Keep searchTypeRef in sync with state
+  useEffect(() => {
+    searchTypeRef.current = searchType;
+  }, [searchType]);
+
+ // In the handleSearchTypeChange function:
+const handleSearchTypeChange = (type: "fuzzy" | "phrase" | "wildcard") => {
+    setSearchType(type);
+    setQuery(prev => {
+      // Auto-add * for wildcard if empty
+      if (type === "wildcard" && !prev.includes('*')) return prev + '*';
+      return prev;
+    });
+  };
+
+  // In the input placeholder:
+//   placeholder={
+//     searchType === "wildcard" ? "Try 'star*' or '*force*'" :
+//     searchType === "phrase" ? 'Try "may the force"' :
+//     "Search movies..."
+//   }
 
   const searchMovies = async () => {
-    if (!query.trim()) return; // Skip empty queries
-
-    const params = new URLSearchParams({
-      q: query,
-      type: searchType,
-    });
-
-    console.log("Search Type:", searchType);
-    console.log("API Params:", params.toString());
+    if (!query.trim()) return;
+    setIsLoading(true);
 
     try {
+      const params = new URLSearchParams({
+        q: query,
+        type: searchTypeRef.current,
+      });
+
+      console.log("Search Type:", searchTypeRef.current);
+      console.log("API Params:", params.toString());
+
+      // Add delay to avoid rapid API calls
+      await new Promise(resolve => setTimeout(resolve, 200));
+
       const response = await fetch(`/api/search?${params}`);
+      if (!response.ok) throw new Error(response.statusText);
+
       const data = await response.json();
       setResults(data);
     } catch (error) {
       console.error("Search error:", error);
+      setResults([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -44,13 +77,20 @@ export default function Search() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="flex-1 p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="Search movies by quotes, actors, or genres..."
+            placeholder={
+              searchType === "wildcard" ? "Try 'star*' or '*force'" :
+              searchType === "phrase" ? 'Try "may the force"' :
+              "Search movies..."
+            }
           />
           <button
             onClick={searchMovies}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            disabled={isLoading}
+            className={`px-6 py-3 bg-blue-600 text-white rounded-lg ${
+              isLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"
+            }`}
           >
-            Search
+            {isLoading ? "Searching..." : "Search"}
           </button>
         </div>
 
@@ -59,8 +99,8 @@ export default function Search() {
             <button
               key={type}
               onClick={() => {
-                setSearchType(type); // Update search type
-                searchMovies(); // Trigger search immediately
+                handleSearchTypeChange(type);
+                searchMovies();
               }}
               className={`px-4 py-2 rounded capitalize ${
                 searchType === type
