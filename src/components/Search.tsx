@@ -16,49 +16,57 @@ export default function Search() {
   const [searchType, setSearchType] = useState<"fuzzy" | "phrase" | "wildcard">("fuzzy");
   const [isLoading, setIsLoading] = useState(false);
   const searchTypeRef = useRef(searchType);
+  const queryRef = useRef(query);
 
-  // Keep searchTypeRef in sync with state
+  // Keep refs in sync with state
   useEffect(() => {
     searchTypeRef.current = searchType;
-  }, [searchType]);
+    queryRef.current = query;
+  }, [searchType, query]);
 
- // In the handleSearchTypeChange function:
-const handleSearchTypeChange = (type: "fuzzy" | "phrase" | "wildcard") => {
+  const handleSearchTypeChange = (type: "fuzzy" | "phrase" | "wildcard") => {
     setSearchType(type);
-    setQuery(prev => {
-      // Auto-add * for wildcard if empty
-      if (type === "wildcard" && !prev.includes('*')) return prev + '*';
-      return prev;
-    });
+
+    // Clean query based on search type
+    const cleanedQuery = queryRef.current
+      .replace(type === "wildcard" ? /"/g : /\*/g, '')
+      .replace(type === "phrase" ? /\*/g : /"/g, '');
+
+    // Auto-add * for wildcard if empty
+    const newQuery = type === "wildcard" && !cleanedQuery.includes('*')
+      ? cleanedQuery + '*'
+      : cleanedQuery;
+
+    setQuery(newQuery);
+
+    // Trigger search immediately with updated params
+    if (newQuery.trim()) {
+      searchMovies(newQuery, type);
+    }
   };
 
-  // In the input placeholder:
-//   placeholder={
-//     searchType === "wildcard" ? "Try 'star*' or '*force*'" :
-//     searchType === "phrase" ? 'Try "may the force"' :
-//     "Search movies..."
-//   }
+  const searchMovies = async (customQuery?: string, customType?: "fuzzy" | "phrase" | "wildcard") => {
+    const currentQuery = customQuery || queryRef.current;
+    const currentType = customType || searchTypeRef.current;
 
-  const searchMovies = async () => {
-    if (!query.trim()) return;
+    if (!currentQuery.trim()) return;
     setIsLoading(true);
 
     try {
       const params = new URLSearchParams({
-        q: query,
-        type: searchTypeRef.current,
+        q: currentQuery,
+        type: currentType,
       });
 
-      console.log("Search Type:", searchTypeRef.current);
+      console.log("Search Type:", currentType);
       console.log("API Params:", params.toString());
 
-      // Add delay to avoid rapid API calls
       await new Promise(resolve => setTimeout(resolve, 200));
-
       const response = await fetch(`/api/search?${params}`);
-      if (!response.ok) throw new Error(response.statusText);
 
+      if (!response.ok) throw new Error(response.statusText);
       const data = await response.json();
+
       setResults(data);
     } catch (error) {
       console.error("Search error:", error);
@@ -84,7 +92,7 @@ const handleSearchTypeChange = (type: "fuzzy" | "phrase" | "wildcard") => {
             }
           />
           <button
-            onClick={searchMovies}
+            onClick={() => searchMovies()}
             disabled={isLoading}
             className={`px-6 py-3 bg-blue-600 text-white rounded-lg ${
               isLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"
@@ -98,10 +106,7 @@ const handleSearchTypeChange = (type: "fuzzy" | "phrase" | "wildcard") => {
           {(["fuzzy", "phrase", "wildcard"] as const).map((type) => (
             <button
               key={type}
-              onClick={() => {
-                handleSearchTypeChange(type);
-                searchMovies();
-              }}
+              onClick={() => handleSearchTypeChange(type)}
               className={`px-4 py-2 rounded capitalize ${
                 searchType === type
                   ? "bg-gray-800 text-white"
