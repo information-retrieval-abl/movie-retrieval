@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from "react";
+import './Search.css'; // Create this CSS file
+
 
 interface MovieResult {
   id: number;
@@ -77,14 +79,13 @@ export default function Search() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex gap-2 mb-6">
+    <div className="search-container">
+      <div className="search-wrapper">
+        <div className="search-bar">
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="flex-1 p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             placeholder={
               searchType === "wildcard" ? "Try 'star*' or '*force'" :
               searchType === "phrase" ? 'Try "may the force"' :
@@ -94,63 +95,47 @@ export default function Search() {
           <button
             onClick={() => searchMovies()}
             disabled={isLoading}
-            className={`px-6 py-3 bg-blue-600 text-white rounded-lg ${
-              isLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-700"
-            }`}
           >
             {isLoading ? "Searching..." : "Search"}
           </button>
         </div>
 
-        <div className="flex gap-2 mb-6">
+        <div className="search-types">
           {(["fuzzy", "phrase", "wildcard"] as const).map((type) => (
             <button
               key={type}
               onClick={() => handleSearchTypeChange(type)}
-              className={`px-4 py-2 rounded capitalize ${
-                searchType === type
-                  ? "bg-gray-800 text-white"
-                  : "bg-gray-200 hover:bg-gray-300"
-              }`}
+              className={searchType === type ? "active" : ""}
             >
               {type} Search
             </button>
           ))}
         </div>
 
-        <div className="space-y-4">
+        <div className="results-grid">
           {results.map((movie) => (
-            <div
-              key={movie.id}
-              className="bg-white rounded-lg shadow-sm p-4 border"
-            >
-              <div className="flex gap-4">
-                {movie.poster_path && (
-                  <img
-                    src={`https://image.tmdb.org/t/p/w200${movie.poster_path}`}
-                    alt={movie.title}
-                    className="w-32 h-48 object-cover rounded"
-                  />
-                )}
-                <div className="flex-1">
-                  <h2 className="text-xl font-bold mb-2">{movie.title}</h2>
-                  <p className="text-gray-600 text-sm mb-3">{movie.overview}</p>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="bg-gray-100 px-2 py-1 rounded text-xs">
-                      🎬 {new Date(movie.release_date).getFullYear()}
+            <div key={movie.id} className="movie-card">
+              {movie.poster_path && (
+                <img
+                  src={`https://image.tmdb.org/t/p/w200${movie.poster_path}`}
+                  alt={movie.title}
+                />
+              )}
+              <div className="movie-info">
+                <h2>{movie.title}</h2>
+                <p>{movie.overview}</p>
+                <div className="movie-meta">
+                  <span className="year">
+                    🎬 {new Date(movie.release_date).getFullYear()}
+                  </span>
+                  <span className="rating">
+                    ★ {movie.vote_average}
+                  </span>
+                  {movie.actors?.map((actor) => (
+                    <span key={actor} className="actor">
+                      👤 {actor}
                     </span>
-                    <span className="bg-yellow-100 px-2 py-1 rounded text-xs">
-                      ★ {movie.vote_average}
-                    </span>
-                    {movie.actors?.map((actor) => (
-                      <span
-                        key={actor}
-                        className="bg-blue-100 px-2 py-1 rounded text-xs"
-                      >
-                        👤 {actor}
-                      </span>
-                    ))}
-                  </div>
+                  ))}
                 </div>
               </div>
             </div>
