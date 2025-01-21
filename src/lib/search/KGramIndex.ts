@@ -21,12 +21,19 @@ export class KGramIndex {
         this.index.get(gram)?.forEach(movieId => candidates.add(movieId));
       });
 
-      return Array.from(candidates);
+      return Array.from(candidates).filter(id =>
+        wildcardRegex.test(this.getOriginalTerm(id) || "")
+      );
     }
 
     private getPrefixGrams(prefix: string): string[] {
       return Array.from({ length: prefix.length - this.k + 1 }, (_, i) =>
         prefix.substring(i, i + this.k)
       );
+    }
+
+    private getOriginalTerm(movieId: number): string {
+      // Implement reverse lookup from movie ID to original term
+      return ""; // Replace with actual logic
     }
   }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 
 interface MovieResult {
   id: number;
@@ -11,24 +11,27 @@ interface MovieResult {
 }
 
 export default function Search() {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [results, setResults] = useState<MovieResult[]>([]);
-  const [searchType, setSearchType] = useState<
-    'phrase' | 'wildcard' | 'fuzzy'
-  >('fuzzy');
+  const [searchType, setSearchType] = useState<"fuzzy" | "phrase" | "wildcard">("fuzzy");
 
   const searchMovies = async () => {
+    if (!query.trim()) return; // Skip empty queries
+
     const params = new URLSearchParams({
       q: query,
       type: searchType,
     });
+
+    console.log("Search Type:", searchType);
+    console.log("API Params:", params.toString());
 
     try {
       const response = await fetch(`/api/search?${params}`);
       const data = await response.json();
       setResults(data);
     } catch (error) {
-      console.error('Search error:', error);
+      console.error("Search error:", error);
     }
   };
 
@@ -52,14 +55,17 @@ export default function Search() {
         </div>
 
         <div className="flex gap-2 mb-6">
-          {(['fuzzy', 'phrase', 'wildcard'] as const).map((type) => (
+          {(["fuzzy", "phrase", "wildcard"] as const).map((type) => (
             <button
               key={type}
-              onClick={() => setSearchType(type)}
+              onClick={() => {
+                setSearchType(type); // Update search type
+                searchMovies(); // Trigger search immediately
+              }}
               className={`px-4 py-2 rounded capitalize ${
                 searchType === type
-                  ? 'bg-gray-800 text-white'
-                  : 'bg-gray-200 hover:bg-gray-300'
+                  ? "bg-gray-800 text-white"
+                  : "bg-gray-200 hover:bg-gray-300"
               }`}
             >
               {type} Search

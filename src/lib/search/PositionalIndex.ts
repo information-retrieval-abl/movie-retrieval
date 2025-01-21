@@ -12,11 +12,14 @@ export class PositionalIndex {
 
     searchPhrase(phrase: string): number[] {
       const tokens = this.tokenize(phrase);
+      if (tokens.length === 0) return [];
+
       const results = new Set<number>();
 
-      for (const docId of Object.keys(this.index[tokens[0]] || {})) {
+      const firstTokenDocs = this.index[tokens[0]] || {};
+      Object.keys(firstTokenDocs).forEach(docId => {
         const numericDocId = Number(docId);
-        const positions = tokens.map(t => this.index[t]?.[numericDocId] || []);
+        const positions = tokens.map(token => this.index[token]?.[numericDocId] || []);
 
         if (positions.every(p => p.length > 0)) {
           positions[0].forEach(pos => {
@@ -25,7 +28,7 @@ export class PositionalIndex {
             }
           });
         }
-      }
+      });
 
       return Array.from(results);
     }
