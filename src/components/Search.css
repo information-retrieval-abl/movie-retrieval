@@ -1,146 +1,186 @@
-/* Base Styles */
-:root {
-    --primary-color: #2563eb;
-    --background-color: #f8fafc;
-    --text-color: #1e293b;
-    --border-color: #e2e8f0;
+.google-style-container {
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
   }
+
+  .search-header {
+    padding: 20px;
+    border-bottom: 1px solid #ebebeb;
+  }
+
+  .logo {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-left: 15px;
+  }
+
+  .blue { color: #4285f4; }
+  .red { color: #ea4335; }
+  .yellow { color: #fbbc05; }
+  .green { color: #34a853; }
 
   .search-container {
-    min-height: 100vh;
-    padding: 2rem;
-    background-color: var(--background-color);
-    font-family: system-ui, -apple-system, sans-serif;
-  }
-
-  .search-wrapper {
-    max-width: 1200px;
+    max-width: 700px;
     margin: 0 auto;
+    padding: 20px;
   }
 
-  /* Search Bar */
-  .search-bar {
+  .search-box {
+    margin-top: 30px;
+  }
+
+  .search-input {
+    position: relative;
+    width: 100%;
+    border: 1px solid #dfe1e5;
+    border-radius: 24px;
+    padding: 0 20px;
     display: flex;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+    align-items: center;
+    height: 46px;
+    transition: all 0.3s;
   }
 
-  .search-bar input {
+  .search-input:hover,
+  .search-input:focus-within {
+    box-shadow: 0 1px 6px rgba(32,33,36,.28);
+  }
+
+  .search-icon {
+    width: 20px;
+    height: 20px;
+    color: #9aa0a6;
+    margin-right: 15px;
+  }
+
+  .search-input input {
     flex: 1;
-    padding: 0.75rem 1rem;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 1rem;
-  }
-
-  .search-bar button {
-    padding: 0.75rem 1.5rem;
-    background-color: var(--primary-color);
-    color: white;
     border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.2s;
+    outline: none;
+    font-size: 16px;
+    height: 100%;
+    background: transparent;
   }
 
-  .search-bar button:hover:not(:disabled) {
-    background-color: #1d4ed8;
+  .spinner-container {
+    margin-left: auto;
   }
 
-  .search-bar button:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
+  .spinner {
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #4285f4;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 1s linear infinite;
   }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .search-results {
+    margin-top: 30px;
+  }
+
+  .result-item {
+    margin-bottom: 30px;
+    display: flex;
+    gap: 20px;
+  }
+
+  .movie-poster {
+    width: 92px;
+    height: 138px;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+
+  .result-content {
+    flex: 1;
+  }
+
+  .result-title {
+    color: #1a0dab;
+    font-size: 1.2rem;
+    margin: 0 0 4px;
+  }
+
+  .result-metadata {
+    color: #006621;
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+  }
+
+  .result-snippet {
+    color: #545454;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 8px 0;
+  }
+
+  .actors {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .actor-tag {
+    background: #f1f3f4;
+    color: #202124;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+  }
+
+  .year {
+    margin-right: 15px;
+  }
+
+  .rating {
+    color: #faab00;
+  }
+
 
   /* Search Type Toggles */
-  .search-types {
+.search-types {
     display: flex;
-    gap: 0.5rem;
-    margin-bottom: 2rem;
+    gap: 15px;
+    margin-top: 20px;
+    justify-content: center;
   }
 
-  .search-types button {
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 6px;
-    background-color: #e2e8f0;
-    color: #64748b;
+  .search-type {
+    background: #f8f9fa;
+    border: 1px solid #dadce0;
+    color: #3c4043;
+    padding: 6px 16px;
+    border-radius: 4px;
+    font-size: 14px;
     cursor: pointer;
     transition: all 0.2s;
   }
 
-  .search-types button.active {
-    background-color: var(--primary-color);
-    color: white;
+  .search-type:hover {
+    border-color: #d2e3fc;
+    background: #f1f3f4;
   }
 
-  /* Results Grid */
-  .results-grid {
-    display: grid;
-    gap: 1.5rem;
+  .search-type.active {
+    background: #e8f0fe;
+    border-color: #d2e3fc;
+    color: #1967d2;
   }
 
-  .movie-card {
-    background: white;
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    display: flex;
-    gap: 1.5rem;
-  }
-
-  .movie-card img {
-    width: 150px;
-    height: 225px;
-    border-radius: 8px;
-    object-fit: cover;
-  }
-
-  .movie-info {
-    flex: 1;
-  }
-
-  .movie-info h2 {
-    margin: 0 0 0.5rem;
-    font-size: 1.25rem;
-    color: var(--text-color);
-  }
-
-  .movie-info p {
-    margin: 0 0 1rem;
-    color: #64748b;
-    font-size: 0.9rem;
-    line-height: 1.5;
-  }
-
-  .movie-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-
-  .movie-meta span {
-    padding: 0.25rem 0.5rem;
-    border-radius: 20px;
+  /* Search Type Indicator */
+  .search-type-indicator {
+    margin-left: 15px;
     font-size: 0.8rem;
+    background: #f1f3f4;
+    color: #5f6368;
+    padding: 2px 8px;
+    border-radius: 12px;
   }
 
-  .year { background: #f1f5f9; color: #475569; }
-  .rating { background: #fef9c3; color: #854d0e; }
-  .actor { background: #dbeafe; color: #1e40af; }
-
-  /* Responsive Design */
-  @media (max-width: 768px) {
-    .movie-card {
-      flex-direction: column;
-    }
-
-    .movie-card img {
-      width: 100%;
-      height: auto;
-    }
-
-    .search-bar {
-      flex-direction: column;
-    }
-  }
+  /* Rest of the previous CSS remains the same */
